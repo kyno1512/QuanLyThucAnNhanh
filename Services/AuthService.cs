@@ -49,6 +49,7 @@ namespace QuanLyThucAnNhanh.Services
 
             await _email.SendOtpEmailAsync(user.Email, user.TenDangNhap, otp);
             await _log.LogAsync(user.NguoiDungId, "DangKy", "NguoiDung", user.NguoiDungId);
+
         }
 
         // 🔹 Xác nhận OTP đăng ký
