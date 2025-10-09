@@ -47,7 +47,7 @@ namespace QuanLyThucAnNhanh.Services
             _db.OTPEmails.Add(otpEntity);
             await _db.SaveChangesAsync();
 
-            await _email.SendOtpEmailAsync(user.Email, user.TenDangNhap, otp);
+            //await _email.SendOtpEmailAsync(user.Email, user.TenDangNhap, otp);
             await _log.LogAsync(user.NguoiDungId, "DangKy", "NguoiDung", user.NguoiDungId);
         }
 
