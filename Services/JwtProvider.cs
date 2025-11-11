@@ -17,7 +17,8 @@ namespace QuanLyThucAnNhanh.Services
             {
                 new Claim("UserId", user.NguoiDungId.ToString()),
                 new Claim("TenDangNhap", user.TenDangNhap),
-                new Claim("VaiTro", user.VaiTro)
+                new Claim("VaiTro", user.VaiTro),
+                new Claim("hoTen", user.HoTen ?? "") // <- thêm
             };
 
             var keyString = _config["Jwt:Key"];

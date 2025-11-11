@@ -81,8 +81,23 @@ namespace QuanLyThucAnNhanh.Services
             if (user == null)
                 return null;
 
-            // So sánh mật khẩu (hash)
-            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.MatKhau, user.MatKhauBam);
+            // So sánh mật khẩu: hỗ trợ legacy mật khẩu lưu plain (không có prefix $2)
+            bool isPasswordValid;
+            if (!string.IsNullOrWhiteSpace(user.MatKhauBam) && user.MatKhauBam.StartsWith("$2"))
+            {
+                // BCrypt hash
+                isPasswordValid = BCrypt.Net.BCrypt.Verify(dto.MatKhau, user.MatKhauBam);
+            }
+            else
+            {
+                // Legacy: so sánh plain text, sau đó nâng cấp thành hash để an toàn
+                isPasswordValid = string.Equals(dto.MatKhau, user.MatKhauBam);
+                if (isPasswordValid)
+                {
+                    user.MatKhauBam = BCrypt.Net.BCrypt.HashPassword(dto.MatKhau);
+                    await _db.SaveChangesAsync();
+                }
+            }
 
             if (!isPasswordValid)
                 return null;

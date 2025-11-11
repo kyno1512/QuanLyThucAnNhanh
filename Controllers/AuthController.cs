@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;           // <--
+using QuanLyThucAnNhanh.Data;                 // <--
 using QuanLyThucAnNhanh.DTOs;
 using QuanLyThucAnNhanh.Services;
 
@@ -9,10 +11,12 @@ namespace QuanLyThucAnNhanh.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthService _auth;
+        private readonly AppDbContext _db;     // <--
 
-        public AuthController(AuthService auth)
+        public AuthController(AuthService auth, AppDbContext db) // <--
         {
             _auth = auth;
+            _db = db;                          // <--
         }
 
         [HttpPost("register")]
@@ -33,7 +37,15 @@ namespace QuanLyThucAnNhanh.Controllers
         public async Task<IActionResult> Login(LoginDto dto)
         {
             var token = await _auth.DangNhap(dto);
-            return token == null ? Unauthorized("Sai tài khoản hoặc mật khẩu") : Ok(new { Token = token });
+            if (token == null) return Unauthorized("Sai tài khoản hoặc mật khẩu");
+
+            // Lấy họ tên để trả kèm
+            var user = await _db.NguoiDungs
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(u => u.TenDangNhap == dto.TenDangNhap);
+
+            // nên dùng key thường để FE truy cập dễ: res.data.token, res.data.hoTen
+            return Ok(new { token, hoTen = user?.HoTen ?? "" });
         }
 
         [HttpPost("forgot-password")]
